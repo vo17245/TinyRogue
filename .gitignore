@@ -1,0 +1,11 @@
+/Assets/Atlas
+/Assets/Audio
+/Assets/Fonts
+/Assets/Images
+/.vscode
+/.cache
+/Vendor
+/CMake
+/compile_commands.json
+/DummyBuildDebug
+/BuildDebug
