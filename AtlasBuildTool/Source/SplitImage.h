@@ -14,7 +14,7 @@ struct SplitImageParam
     Vec2u rectSize;
 };
 
-int SplitImage(const SplitImageParam& param)
+inline int SplitImage(const SplitImageParam& param)
 {
     // ensure output dir
     if(!Filesystem::Exists(param.outputDir))
