@@ -130,7 +130,7 @@ std::optional<std::string> CreateAtlas(CreateAtlasParam& param)
     {
         auto& image = images[i];
         auto& pos = imagePositions[i];
-        AABB2D range{Vec2f{(float)pos.x(), (float)pos.y()}, Vec2f{(float)(pos.x() + image.GetWidth()), (float)(pos.y() + image.GetHeight())}};
+        AABB2D range{Vec2i{(float)pos.x(), (float)pos.y()}, Vec2i{(float)(pos.x() + image.GetWidth()), (float)(pos.y() + image.GetHeight())}};
         atlasInfo.sequenceRange.push_back(range);
     }
     // save atlas info
@@ -141,7 +141,7 @@ std::optional<std::string> CreateAtlas(CreateAtlasParam& param)
     }
     return std::nullopt; // success
 }
-int HandleCreateAtlasAction(int argc, char** argv)
+inline int HandleCreateAtlasAction(int argc, char** argv)
 {
     if(argc<5)
     {

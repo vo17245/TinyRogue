@@ -7,8 +7,8 @@ file(GLOB_RECURSE FILES
 "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h"
 )
 
-set(MODULE_NAME "AtlasTool")
-add_library(${MODULE_NAME} STATIC ${FILES})
+set(MODULE_NAME "AtlasBuildTool")
+add_executable(${MODULE_NAME} ${FILES})
 target_link_libraries(${MODULE_NAME} PUBLIC Atlas)
 target_link_libraries(${MODULE_NAME} PUBLIC IO)
 target_link_libraries(${MODULE_NAME} PUBLIC RectangleBinPack)
