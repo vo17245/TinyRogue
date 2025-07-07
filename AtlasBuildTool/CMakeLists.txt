@@ -9,7 +9,7 @@ file(GLOB_RECURSE FILES
 
 set(MODULE_NAME "AtlasBuildTool")
 add_executable(${MODULE_NAME} ${FILES})
-target_link_libraries(${MODULE_NAME} PUBLIC Atlas)
+target_link_libraries(${MODULE_NAME} PUBLIC Sprite)
 target_link_libraries(${MODULE_NAME} PUBLIC IO)
 target_link_libraries(${MODULE_NAME} PUBLIC RectangleBinPack)
 

@@ -4,9 +4,9 @@
 #include <string>
 #include <optional>
 #include <print>
-#include <Atlas/Atlas.h>
 #include <RectangleBinPack/MaxRectsBinPack.h>
-
+#include <Sprite/Atlas.h>
+using namespace Aether;
 struct SplitImageParam
 {
     std::string imagePath;

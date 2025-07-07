@@ -1,5 +1,7 @@
 #include "Atlas.h"
 #include <Filesystem/Filesystem.h>
+namespace Aether::Sprite
+{
 
 std::optional<AtlasInfo> AtlasInfo::Load(const std::string_view path)
 {
@@ -25,3 +27,4 @@ bool AtlasInfo::Save(const std::string_view path)
     return Filesystem::WriteFile(path, jsonStr);
 }
 
+}

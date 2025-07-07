@@ -7,12 +7,13 @@ file(GLOB_RECURSE FILES
 "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h"
 )
 
-set(MODULE_NAME "Atlas")
+set(MODULE_NAME "Sprite")
 add_library(${MODULE_NAME} STATIC ${FILES})
 target_include_directories(${MODULE_NAME} PUBLIC
     "Source"
 )
-target_link_libraries(${MODULE_NAME} PUBLIC Filesystem)
-target_link_libraries(${MODULE_NAME} PUBLIC Core)
-target_link_libraries(${MODULE_NAME} PUBLIC Render)
-target_link_libraries(${MODULE_NAME} PUBLIC Resource)
+target_link_libraries(${MODULE_NAME} PUBLIC
+Core 
+Render 
+Resource 
+)

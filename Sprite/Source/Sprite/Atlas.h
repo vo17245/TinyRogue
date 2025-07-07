@@ -6,18 +6,49 @@
 #include <Core/Serialization.h>
 #include <format>
 #include <Resource/Resource.h>
-using namespace Aether;
-struct AABB2D
+#include <Core/Core.h>
+namespace Aether::Sprite
+{
+
+struct AABB
 {
     Vec2i min;
     Vec2i max;
 };
+
+struct AtlasInfo
+{
+    Resource::ColorSpace colorSpace;
+    std::string imagePath;
+    /**
+     * frameRange in this basis:
+     * 0------> image width
+     * |
+     * |
+     * |
+     * V
+     * image height
+     */
+    std::vector<AABB> frameRange;
+    static std::optional<AtlasInfo> Load(const std::string_view path);
+    bool Save(const std::string_view path);
+};
+namespace Aether
+{
+
+} // namespace Aether
+struct Atlas
+{
+    AtlasInfo info;
+    Borrow<DeviceTexture> texture;
+};
+} // namespace Aether::Sprite
 namespace Aether
 {
 template <>
-struct ToJson<AABB2D>
+struct ToJson<Sprite::AABB>
 {
-    Json operator()(const AABB2D& t)
+    Json operator()(const Sprite::AABB& t)
     {
         Json json;
         json["min"] = ToJson<Vec2i>()(t.min);
@@ -26,14 +57,14 @@ struct ToJson<AABB2D>
     }
 };
 template <>
-struct FromJson<AABB2D>
+struct FromJson<Sprite::AABB>
 {
-    std::expected<AABB2D, std::string> operator()(const Json& json)
+    std::expected<Sprite::AABB, std::string> operator()(const Json& json)
     {
         try
         {
             auto json_min = json["min"];
-            auto minEx= FromJson<Vec2i>()(json_min);
+            auto minEx = FromJson<Vec2i>()(json_min);
             if (!minEx.has_value())
             {
                 return std::unexpected<std::string>(std::format("failed to load min: {}", minEx.error()));
@@ -44,94 +75,64 @@ struct FromJson<AABB2D>
             {
                 return std::unexpected<std::string>(std::format("failed to load max: {}", maxEx.error()));
             }
-            AABB2D aabb;
+            Sprite::AABB aabb;
             aabb.min = minEx.value();
             aabb.max = maxEx.value();
             return aabb;
-            
         }
-        catch(...)
+        catch (...)
         {
             return std::unexpected<std::string>("unknown error");
         }
-        
     }
 };
-} // namespace Aether
-
-struct AtlasInfo
-{
-    Resource::ColorSpace colorSpace;
-    std::string imagePath;
-    /**
-     * sequenceRange in this basis:
-     * 0------> image width
-     * |
-     * |
-     * |
-     * V
-     * image height
-    */
-    std::vector<AABB2D> sequenceRange; 
-    float sequenceDuration = 0.25f;    // in seconds
-    static std::optional<AtlasInfo> Load(const std::string_view path);
-    bool Save(const std::string_view path);
-};
-namespace Aether
-{
 template <>
-struct ToJson<AtlasInfo>
+struct ToJson<Sprite::AtlasInfo>
 {
-    Json operator()(const AtlasInfo& t)
+    Json operator()(const Sprite::AtlasInfo& t)
     {
         Json json;
         json["colorSpace"] = ToJson<Resource::ColorSpace>()(t.colorSpace);
         json["imagePath"] = t.imagePath;
-        json["sequenceRange"] = ToJson<std::vector<AABB2D>>{}(t.sequenceRange);
-        json["sequenceDuration"] = t.sequenceDuration;
+        json["frameRange"] = ToJson<std::vector<Sprite::AABB>>{}(t.frameRange);
         return json;
     }
 };
 template <>
-struct FromJson<AtlasInfo>
+struct FromJson<Sprite::AtlasInfo>
 {
-    std::expected<AtlasInfo, std::string> operator()(const Json& json)
+    std::expected<Sprite::AtlasInfo, std::string> operator()(const Json& json)
     {
-        
         try
         {
-            AtlasInfo info;
+            Sprite::AtlasInfo info;
             if (!json.is_object())
             {
                 return std::unexpected<std::string>("json is not an object");
             }
             auto& json_colorSpace = json["colorSpace"];
-            auto colorSpaceEx=FromJson<Resource::ColorSpace>{}(json_colorSpace);
-            if(!colorSpaceEx)
+            auto colorSpaceEx = FromJson<Resource::ColorSpace>{}(json_colorSpace);
+            if (!colorSpaceEx)
             {
                 return std::unexpected<std::string>(std::format("failed to load colorSpace: {}", colorSpaceEx.error()));
             }
             info.colorSpace = colorSpaceEx.value();
             auto& json_imagePath = json["imagePath"];
-            auto imagePathEx= FromJson<std::string>{}(json_imagePath);
+            auto imagePathEx = FromJson<std::string>{}(json_imagePath);
             if (!imagePathEx)
             {
                 return std::unexpected<std::string>(std::format("failed to load imagePath: {}", imagePathEx.error()));
             }
             info.imagePath = std::move(imagePathEx.value());
-            auto& json_sequenceRange = json["sequenceRange"];
-            auto sequenceRangeEx = FromJson<std::vector<AABB2D>>{}(json_sequenceRange);
-            if (!sequenceRangeEx)
+            auto& json_frameRange = json["frameRange"];
+            auto frameRangeEx = FromJson<std::vector<Sprite::AABB>>{}(json_frameRange);
+            if (!frameRangeEx)
             {
-                return std::unexpected<std::string>(std::format("failed to load sequenceRange: {}", sequenceRangeEx.error()));
+                return std::unexpected<std::string>(std::format("failed to load frameRange: {}", frameRangeEx.error()));
             }
-            info.sequenceRange = std::move(sequenceRangeEx.value());
-            auto& json_sequenceDuration = json["sequenceDuration"];
-            float sequenceDuration = json_sequenceDuration.get<float>();
-            info.sequenceDuration=sequenceDuration;
+            info.frameRange = std::move(frameRangeEx.value());
 
             return info;
-
         }
         catch (...)
         {
@@ -140,8 +141,3 @@ struct FromJson<AtlasInfo>
     }
 };
 } // namespace Aether
-struct Atlas
-{
-    AtlasInfo info;
-    DeviceTexture texture;
-};

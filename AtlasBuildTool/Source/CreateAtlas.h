@@ -4,14 +4,14 @@
 #include <string>
 #include <optional>
 #include <print>
-#include <Atlas/Atlas.h>
+#include <Sprite/Atlas.h>
 #include <RectangleBinPack/MaxRectsBinPack.h>
+using namespace Aether;
 struct CreateAtlasParam
 {
-    std::vector<std::string> sequencePaths;
+    std::vector<std::string> framePaths;
     std::string root;               // output root
     std::string outputPath;         // realative to root
-    float sequenceDuration = 0.25f; // in seconds
     bool linear = false;            // linear or srgb
 };
 bool BuildLayout(const std::vector<Image>& images, const Vec2u& binSize, /*out*/ std::vector<Vec2u>& pos)
@@ -57,7 +57,7 @@ std::optional<std::string> CreateAtlas(CreateAtlasParam& param)
     }
     // load images
     std::vector<Image> images;
-    for (auto path : param.sequencePaths)
+    for (auto path : param.framePaths)
     {
         auto imageEx = Image::LoadFromFile(path);
         if (!imageEx)
@@ -115,7 +115,7 @@ std::optional<std::string> CreateAtlas(CreateAtlasParam& param)
     std::string atlasImagePath = outputDir + "/atlas.png";
     atlasImage.SaveToPngFile(atlasImagePath.c_str());
     // create atlas info
-    AtlasInfo atlasInfo;
+    Sprite::AtlasInfo atlasInfo;
     if (param.linear)
     {
         atlasInfo.colorSpace = Resource::ColorSpace::LINEAR;
@@ -125,13 +125,12 @@ std::optional<std::string> CreateAtlas(CreateAtlasParam& param)
         atlasInfo.colorSpace = Resource::ColorSpace::SRGB;
     }
     atlasInfo.imagePath = param.outputPath + "/atlas.png";
-    atlasInfo.sequenceDuration = param.sequenceDuration;
     for (size_t i = 0; i < images.size(); ++i)
     {
         auto& image = images[i];
         auto& pos = imagePositions[i];
-        AABB2D range{Vec2i{(float)pos.x(), (float)pos.y()}, Vec2i{(float)(pos.x() + image.GetWidth()), (float)(pos.y() + image.GetHeight())}};
-        atlasInfo.sequenceRange.push_back(range);
+        Sprite::AABB range{Vec2i{(float)pos.x(), (float)pos.y()}, Vec2i{(float)(pos.x() + image.GetWidth()), (float)(pos.y() + image.GetHeight())}};
+        atlasInfo.frameRange.push_back(range);
     }
     // save atlas info
     std::string atlasInfoPath = outputDir + "/atlas.json";
@@ -145,15 +144,15 @@ inline int HandleCreateAtlasAction(int argc, char** argv)
 {
     if(argc<5)
     {
-        std::print("Usage: %s create_atlas <output_path> <duration> <sequence_path1> <sequence_path2> ...\n", argv[0]);
+        std::print("Usage: %s create_atlas <root> <output_path> <sequence_path1> <sequence_path2> ...\n", argv[0]);
         return 1;
     }
     CreateAtlasParam param;
-    param.outputPath = argv[2];
-    param.sequenceDuration = std::stof(argv[3]);
+    param.root= argv[2];
+    param.outputPath = argv[3];
     for (int i = 4; i < argc; ++i)
     {
-        param.sequencePaths.push_back(argv[i]);
+        param.framePaths.push_back(argv[i]);
     }
 
     auto err = CreateAtlas(param);
